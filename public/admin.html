@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据管理后台 · 停车场车位地图管理系统</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🅿️ 数据管理后台<span class="sub">专业课程设计II · 题目2</span></div>
+    <div class="stats" id="stats"></div>
+    <div class="actions">
+      <span class="user-info" id="user-info"></span>
+      <a class="btn ghost" href="index.html">返回地图</a>
+      <button class="btn ghost" id="btn-logout">退出</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <!-- 停车场 -->
+      <section class="panel">
+        <h3>停车场 <span id="lot-mode" class="badge">新增</span></h3>
+        <label>名称</label><input id="lot-name" placeholder="如 图书馆地下停车场">
+        <label>地址</label><input id="lot-address" placeholder="如 南京市栖霞区文苑路9号">
+        <label>容量（可选）</label><input id="lot-capacity" type="number" value="0">
+        <label>边界多边形</label>
+        <div class="row">
+          <button class="btn ghost small" id="btn-draw-lot">点击地图采集顶点</button>
+          <button class="btn ghost small" id="btn-clear-lot">清除</button>
+        </div>
+        <p class="hint" id="lot-geom-hint">未采集（采集时单击加点，双击结束）</p>
+        <div class="row">
+          <button class="btn primary" id="btn-save-lot">保存停车场</button>
+          <button class="btn ghost" id="btn-cancel-lot">取消编辑</button>
+        </div>
+      </section>
+      <section class="panel list-panel">
+        <h3>停车场列表</h3>
+        <ul id="lot-list" class="result-list"></ul>
+      </section>
+
+      <!-- 车位 -->
+      <section class="panel">
+        <h3>车位 <span id="space-mode" class="badge">新增</span></h3>
+        <label>所属停车场</label><select id="sp-lot"></select>
+        <label>车位标识</label><input id="sp-code" placeholder="如 A-01">
+        <label>状态</label>
+        <select id="sp-status">
+          <option value="free">空闲</option>
+          <option value="occupied">占用</option>
+          <option value="reserved">已预约</option>
+          <option value="disabled">停用</option>
+        </select>
+        <label>价格（元/小时）</label><input id="sp-price" type="number" value="2.5" step="0.5">
+        <label>车型</label><input id="sp-vtype" value="小型车">
+        <label>位置</label>
+        <div class="row">
+          <input id="sp-lng" placeholder="经度 lng">
+          <input id="sp-lat" placeholder="纬度 lat">
+        </div>
+        <div class="row">
+          <button class="btn ghost small" id="btn-pick-point">点击地图取点</button>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btn-save-space">保存车位</button>
+          <button class="btn ghost" id="btn-cancel-space">取消编辑</button>
+        </div>
+      </section>
+      <section class="panel list-panel">
+        <h3>车位列表 <span id="space-count" class="badge">0</span></h3>
+        <ul id="space-list" class="result-list"></ul>
+      </section>
+    </aside>
+
+    <main class="map-wrap"><div id="map"></div></main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

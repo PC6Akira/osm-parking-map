@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 · 停车场车位地图管理系统</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <div class="auth-brand">🅿️ 停车场车位地图管理系统</div>
+    <div class="auth-sub">专业课程设计II · 题目2</div>
+
+    <div class="auth-tabs">
+      <button id="tab-login" class="auth-tab active">登录</button>
+      <button id="tab-register" class="auth-tab">注册</button>
+    </div>
+
+    <label>用户名</label>
+    <input id="username" placeholder="请输入用户名">
+
+    <label>密码</label>
+    <input id="password" type="password" placeholder="请输入密码">
+
+    <!-- 注册时显示：姓名 -->
+    <div id="real-name-wrap" class="hidden">
+      <label>姓名（选填）</label>
+      <input id="real-name" placeholder="用于租用记录">
+    </div>
+
+    <!-- 登录时显示：管理员 -->
+    <div id="admin-wrap">
+      <label class="auth-check"><input type="checkbox" id="is-admin"> 我是管理员</label>
+      <div id="admin-key-wrap" class="hidden">
+        <label>管理员密钥</label>
+        <input id="admin-key" type="password" placeholder="请输入管理员密钥">
+      </div>
+    </div>
+
+    <button class="btn primary" id="btn-submit" style="width:100%;margin-top:14px;">登录</button>
+    <p class="hint" id="auth-msg" style="text-align:center;"></p>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    let mode = 'login'; // 'login' | 'register'
+
+    const $ = (id) => document.getElementById(id);
+    const msg = (t, err) => { const el = $('auth-msg'); el.textContent = t; el.style.color = err ? '#e74c3c' : '#2ecc71'; };
+
+    function syncForm() {
+      $('real-name-wrap').classList.toggle('hidden', mode !== 'register');
+      $('admin-wrap').classList.toggle('hidden', mode !== 'login');
+      $('btn-submit').textContent = mode === 'login' ? '登录' : '注册';
+      $('tab-login').classList.toggle('active', mode === 'login');
+      $('tab-register').classList.toggle('active', mode === 'register');
+    }
+
+    $('tab-login').addEventListener('click', () => { mode = 'login'; syncForm(); });
+    $('tab-register').addEventListener('click', () => { mode = 'register'; syncForm(); });
+
+    $('is-admin').addEventListener('change', (e) => {
+      $('admin-key-wrap').classList.toggle('hidden', !e.target.checked);
+    });
+
+    $('btn-submit').addEventListener('click', async () => {
+      const username = $('username').value.trim();
+      const password = $('password').value;
+      if (!username || !password) return msg('请输入用户名和密码', true);
+
+      const body = mode === 'login'
+        ? { username, password, admin_key: $('is-admin').checked ? $('admin-key').value.trim() : undefined }
+        : { username, password, real_name: $('real-name').value.trim() || undefined };
+
+      const path = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
+      try {
+        const r = await fetch(path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) return msg(data.error || '操作失败', true);
+
+        Auth.setSession(data.token, data.user);
+        const redirect = new URLSearchParams(location.search).get('redirect') || 'index.html';
+        location.href = redirect;
+      } catch (e) {
+        msg('请求失败：' + e.message, true);
+      }
+    });
+
+    syncForm();
+  </script>
+</body>
+</html>
